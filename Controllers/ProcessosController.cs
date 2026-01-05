@@ -22,17 +22,13 @@ public class ProcessosController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        var roles = await _userManager.GetRolesAsync(user!);
-        var setor = roles.FirstOrDefault();
+        var role = (await _userManager.GetRolesAsync(user!)).FirstOrDefault();
 
         IQueryable<Processo> query = _context.Processos;
 
-        // 🔐 Admin vê tudo
         if (!User.IsInRole("Admin"))
         {
-            query = query.Where(p => p.Setor == setor);
-            // se quiser permitir processos gerais:
-            // query = query.Where(p => p.Setor == null || p.Setor == setor);
+            query = query.Where(p => p.Setor == role);
         }
 
         var processos = await query
@@ -42,13 +38,16 @@ public class ProcessosController : Controller
         return View(processos);
     }
 
-    [Authorize(Roles = "Admin")]
-    public IActionResult Criar() => View();
-
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Criar(Processo processo, IFormFile arquivo)
     {
+        if (arquivo == null || arquivo.Length == 0)
+            ModelState.AddModelError("", "Arquivo obrigatório");
+
+        if (!ModelState.IsValid)
+            return View(processo);
+
         var pasta = Path.Combine(_env.WebRootPath, "uploads");
         Directory.CreateDirectory(pasta);
 
@@ -66,4 +65,37 @@ public class ProcessosController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Editar(int id)
+    {
+        var processo = await _context.Processos.FindAsync(id);
+        if (processo == null)
+            return NotFound();
+
+        return View(processo);
+    }
+
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Excluir(int id)
+    {
+        var processo = await _context.Processos.FindAsync(id);
+        if (processo == null)
+            return NotFound();
+
+        // apaga arquivo físico
+        if (!string.IsNullOrEmpty(processo.ArquivoPath))
+        {
+            var caminho = Path.Combine(_env.WebRootPath, processo.ArquivoPath.TrimStart('/'));
+            if (System.IO.File.Exists(caminho))
+                System.IO.File.Delete(caminho);
+        }
+
+        _context.Processos.Remove(processo);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+
 }

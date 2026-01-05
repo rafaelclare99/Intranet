@@ -1,53 +1,37 @@
-﻿@model List<IntraNet.Models.Processo>
+﻿@model IEnumerable<IntraNet.Models.Processo>
 
-@{
-    ViewData["Title"] = "Processos";
-}
-
-<h2 class="mb-4">Processos do Setor</h2>
+<h2>Processos</h2>
 
 @if (User.IsInRole("Admin"))
 {
-    <a asp-action="Criar" class="btn btn-primary mb-3">
-        + Novo Processo
-    </a>
+    <a asp-action="Criar" class="btn btn-primary mb-3">+ Novo Processo</a>
 }
 
-@if (Model != null && Model.Any())
+@foreach (var item in Model)
 {
-    <div class="row">
-        @foreach (var processo in Model)
-        {
-            <div class="col-md-6">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">@processo.Titulo</h5>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>@item.Titulo</h5>
+            <p>@item.Descricao</p>
+            <small>Setor: @item.Setor</small><br />
 
-                        <p class="text-muted mb-1">
-                            Setor: <strong>@processo.Setor</strong>
-                        </p>
+            <a href="@item.ArquivoPath" class="btn btn-success btn-sm" download>
+                ⬇️ Baixar Arquivo
+            </a>
 
-                        <p class="card-text">
-                            @processo.Descricao
-                        </p>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="mt-2">
+                    <a asp-action="Editar" asp-route-id="@item.ProcessoId"
+                       class="btn btn-warning btn-sm">Editar</a>
 
-                        @if (!string.IsNullOrEmpty(processo.ArquivoPath))
-                        {
-                            <a href="@Url.Content("~/uploads/" + processo.ArquivoPath)"
-                               target="_blank"
-                               class="btn btn-outline-secondary btn-sm">
-                                📎 Baixar arquivo
-                            </a>
-                        }
-                    </div>
+                    <a asp-action="Excluir" asp-route-id="@item.ProcessoId"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Deseja excluir este processo?');">
+                        Excluir
+                    </a>
                 </div>
-            </div>
-        }
-    </div>
-}
-else
-{
-    <div class="alert alert-info">
-        Nenhum processo cadastrado para este setor.
+            }
+        </div>
     </div>
 }

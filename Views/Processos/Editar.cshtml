@@ -1,0 +1,26 @@
+﻿@model IntraNet.Models.Processo
+
+<form asp-action="Editar" method="post">
+    <input type="hidden" asp-for="ProcessoId" />
+
+    <div class="mb-3">
+        <label>Título</label>
+        <input asp-for="Titulo" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Mensagem</label>
+        <textarea asp-for="Descricao" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Setor</label>
+        <select asp-for="Setor" class="form-control">
+            <option value="">Geral</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="Suporte">Suporte</option>
+        </select>
+    </div>
+
+    <button class="btn btn-success">Salvar</button>
+</form>

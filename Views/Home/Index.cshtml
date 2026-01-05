@@ -1,36 +1,13 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Início";
 }
 
 <section class="welcome">
-    <h1>Olá, <strong>Nome do Agente</strong> 👋</h1>
-    <p>Bem-vindo à intranet da VNT Internet. Confira os avisos mais recentes abaixo.</p>
+    <h1>
+        Olá, <strong>@User.Identity!.Name</strong> 👋
+    </h1>
+
+    <p>
+        Bem-vindo à intranet da VNT Internet.
+    </p>
 </section>
-
-<section class="avisos">
-
-    <h2>📢 Quadro de Avisos</h2>
-
-    <article class="aviso">
-        <h3>Manutenção Programada</h3>
-        <span class="meta">📅 02/01/2026 • 🧑‍💻 NOC</span>
-
-        <p>
-            Lorem Ipsum é simplesmente uma simulação de texto da indústria tipográfica e de impressos,
-            e vem sendo utilizado desde o século XVI. Lorem Ipsum sobreviveu não só a cinco séculos,
-            como também ao salto para a editoração eletrônica.
-        </p>
-    </article>
-
-    <article class="aviso">
-        <h3>Atualização de Procedimentos</h3>
-        <span class="meta">📅 01/01/2026 • 📋 Suporte</span>
-
-        <p>
-            A partir de hoje, os novos procedimentos de atendimento já estão disponíveis na aba
-            <strong>Processos</strong>. Todos os agentes devem revisar o material.
-        </p>
-    </article>
-
-</section>
-

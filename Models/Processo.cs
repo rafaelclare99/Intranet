@@ -1,17 +1,20 @@
-﻿namespace IntraNet.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace IntraNet.Models
 {
     public class Processo
     {
-        public int Id { get; set; }
+        public int ProcessoId { get; set; }
 
-        public string Titulo { get; set; } = string.Empty;
+        [Required]
+        public string Titulo { get; set; } = "";
 
-        public string Descricao { get; set; } = string.Empty;
+        public string Descricao { get; set; } = "";
 
-        public string Setor { get; set; } = string.Empty;
+        public string Setor { get; set; } = "";
 
-        public string? ArquivoPath { get; set; }
+        public string ArquivoPath { get; set; } = "";
 
-        public DateTime DataCriacao { get; set; }
+        public DateTime DataCriacao { get; set; } = DateTime.Now;
     }
 }
