@@ -1,4 +1,4 @@
-﻿@model List<IntraNet.Models.Avisos>
+﻿@model IEnumerable<IntraNet.Models.Avisos>
 
 <h2>Avisos</h2>
 
@@ -7,15 +7,35 @@
     <a asp-action="Criar" class="btn btn-primary mb-3">+ Novo Aviso</a>
 }
 
-@foreach (var aviso in Model)
+@foreach (var item in Model)
 {
     <div class="card mb-3">
         <div class="card-body">
-            <h5>@aviso.Titulo</h5>
+            <h5>@item.Titulo</h5>
+
             <small class="text-muted">
-                @(aviso.Setor ?? "Geral") • @aviso.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                @(item.Setor ?? "Geral") • @item.DataCriacao.ToString("dd/MM/yyyy HH:mm")
             </small>
-            <p class="mt-2">@aviso.Mensagem</p>
+
+            <p class="mt-2">@item.Mensagem</p>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="mt-2">
+                    <a asp-action="Editar"
+                       asp-route-id="@item.AvisosId"
+                       class="btn btn-warning btn-sm">
+                        Editar
+                    </a>
+
+                    <a asp-action="Excluir"
+                       asp-route-id="@item.AvisosId"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Deseja excluir este aviso?');">
+                        Excluir
+                    </a>
+                </div>
+            }
         </div>
     </div>
 }

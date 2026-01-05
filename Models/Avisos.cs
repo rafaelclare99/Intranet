@@ -4,11 +4,20 @@ namespace IntraNet.Models
 {
     public class Avisos
     {
+        [Key] // 👈 garante que o EF entenda como PK
         public int AvisosId { get; set; }
-        public string Titulo { get; set; } = "";
-        public string Mensagem { get; set; } = "";
+
+        [Required]
+        public string Titulo { get; set; } = string.Empty;
+
+        [Required]
+        public string Mensagem { get; set; } = string.Empty;
+
         public DateTime DataCriacao { get; set; } = DateTime.Now;
-        public string Setor { get; set; } // null = geral
-        public string AutorId { get; set; } = "";
+
+        // null = geral
+        public string? Setor { get; set; }
+
+        public string AutorId { get; set; } = string.Empty;
     }
 }
