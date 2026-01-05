@@ -35,7 +35,7 @@ public class AvisosController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Criar()
     {
-        return View();
+        return View("CriarAvisos");
     }
 
     [HttpPost]

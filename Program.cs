@@ -24,6 +24,21 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// 🔐 CONFIGURAÇÃO DO COOKIE (AQUI É O LUGAR CERTO)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = false;
+    options.Cookie.IsEssential = true;
+    options.Cookie.HttpOnly = true;
+
+    // 🔴 COOKIE DE SESSÃO (desloga ao fechar navegador)
+    options.Cookie.MaxAge = null;
+
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+});
+
 var app = builder.Build();
 
 // ================= PIPELINE =================

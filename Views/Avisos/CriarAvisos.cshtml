@@ -1,22 +1,33 @@
-﻿@model Avisos
+﻿@model IntraNet.Models.Avisos
 
-<h2>Novo Aviso</h2>
+@{
+    ViewData["Title"] = "Criar Aviso";
+}
+
+<h2>Criar Aviso</h2>
 
 <form asp-action="Criar" method="post">
     <div class="mb-3">
-        <label>Título</label>
+        <label class="form-label">Título</label>
         <input asp-for="Titulo" class="form-control" />
+        <span asp-validation-for="Titulo" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label>Mensagem</label>
-        <textarea asp-for="Mensagem" class="form-control" rows="4"></textarea>
+        <label class="form-label">Mensagem</label>
+        <textarea asp-for="Mensagem" class="form-control"></textarea>
+        <span asp-validation-for="Mensagem" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label>Setor</label>
-        <input asp-for="Setor" class="form-control" placeholder="Deixe vazio para geral" />
+        <label class="form-label">Setor (opcional)</label>
+        <input asp-for="Setor" class="form-control" placeholder="Ex: Financeiro, NOC, Suporte" />
     </div>
 
-    <button class="btn btn-success">Publicar</button>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
