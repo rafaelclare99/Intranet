@@ -1,7 +1,8 @@
-﻿using IntraNet.Data;
+using IntraNet.Data;
 using IntraNet.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IntraNet.Areas.Identity.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
