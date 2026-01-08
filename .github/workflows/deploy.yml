@@ -1,4 +1,4 @@
-name: Deploy Intranet
+name: Deploy IntraNet (Self-Hosted)
 
 on:
   push:
@@ -13,10 +13,10 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore
@@ -24,4 +24,11 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o /home/intranet/publish
 
-      - name: Restart Intranet
+      - name: Ajustar permissões
+        run: |
+          sudo chown -R noc:noc /home/intranet/publish
+
+      - name: Restart serviço Intranet
+        run: |
+          sudo systemctl restart intranet.service
+          sudo systemctl status intranet.service --no-pager
