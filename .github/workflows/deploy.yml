@@ -13,11 +13,6 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
       - name: Restore
         run: dotnet restore
 
@@ -25,10 +20,7 @@ jobs:
         run: dotnet publish -c Release -o /home/intranet/publish
 
       - name: Ajustar permissões
-        run: |
-          sudo chown -R noc:noc /home/intranet/publish
+        run: sudo chown -R noc:noc /home/intranet/publish
 
       - name: Restart serviço Intranet
-        run: |
-          sudo systemctl restart intranet.service
-          sudo systemctl status intranet.service --no-pager
+        run: sudo systemctl restart intranet.service
