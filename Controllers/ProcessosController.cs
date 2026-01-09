@@ -9,23 +9,33 @@ using Microsoft.EntityFrameworkCore;
 public class ProcessosController : Controller
 {
     private readonly ApplicationDbContext _context;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IWebHostEnvironment _env;
 
-    public ProcessosController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment env)
+    public ProcessosController(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        IWebHostEnvironment env)
     {
         _context = context;
         _userManager = userManager;
         _env = env;
     }
 
+    // 📌 LISTAGEM
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        var role = (await _userManager.GetRolesAsync(user!)).FirstOrDefault();
+
+        if (user == null)
+            return Challenge();
+
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault();
 
         IQueryable<Processo> query = _context.Processos;
 
+        // 🔴 Admin vê tudo
         if (!User.IsInRole("Admin"))
         {
             query = query.Where(p => p.Setor == role);
@@ -38,30 +48,35 @@ public class ProcessosController : Controller
         return View(processos);
     }
 
+    // ➕ CRIAR (GET)
     [Authorize(Roles = "Admin")]
     public IActionResult Criar()
     {
         return View("Criar");
     }
 
+    // ➕ CRIAR (POST)
     [HttpPost]
     [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Criar(Processo processo, IFormFile arquivo)
     {
         if (arquivo == null || arquivo.Length == 0)
             ModelState.AddModelError("", "Arquivo obrigatório");
 
         if (!ModelState.IsValid)
-            return View(processo);
+            return View("Criar", processo);
 
         var pasta = Path.Combine(_env.WebRootPath, "uploads");
         Directory.CreateDirectory(pasta);
 
-        var nomeArquivo = $"{Guid.NewGuid()}_{arquivo.FileName}";
+        var nomeArquivo = $"{Guid.NewGuid()}_{Path.GetFileName(arquivo.FileName)}";
         var caminho = Path.Combine(pasta, nomeArquivo);
 
-        using var stream = new FileStream(caminho, FileMode.Create);
-        await arquivo.CopyToAsync(stream);
+        using (var stream = new FileStream(caminho, FileMode.Create))
+        {
+            await arquivo.CopyToAsync(stream);
+        }
 
         processo.ArquivoPath = "/uploads/" + nomeArquivo;
         processo.DataCriacao = DateTime.Now;
@@ -72,6 +87,7 @@ public class ProcessosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // ✏️ EDITAR (GET)
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Editar(int id)
     {
@@ -82,6 +98,7 @@ public class ProcessosController : Controller
         return View(processo);
     }
 
+    // ❌ EXCLUIR
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Excluir(int id)
     {
@@ -89,10 +106,13 @@ public class ProcessosController : Controller
         if (processo == null)
             return NotFound();
 
-        // apaga arquivo físico
+        // 🗑️ Remove arquivo físico
         if (!string.IsNullOrEmpty(processo.ArquivoPath))
         {
-            var caminho = Path.Combine(_env.WebRootPath, processo.ArquivoPath.TrimStart('/'));
+            var caminho = Path.Combine(
+                _env.WebRootPath,
+                processo.ArquivoPath.TrimStart('/'));
+
             if (System.IO.File.Exists(caminho))
                 System.IO.File.Delete(caminho);
         }
@@ -102,6 +122,4 @@ public class ProcessosController : Controller
 
         return RedirectToAction(nameof(Index));
     }
-
-
 }
