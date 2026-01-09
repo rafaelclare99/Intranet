@@ -1,10 +1,15 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@using IntraNet.Models
+@inject UserManager<ApplicationUser> UserManager
+
+@{
     ViewData["Title"] = "Início";
+    var usuario = await UserManager.GetUserAsync(User);
 }
 
 <section class="welcome">
     <h1>
-        Olá, <strong>@User.Identity!.Name</strong> 👋
+        Olá, <strong>@usuario?.Nome</strong> 👋
     </h1>
 
     <p>
