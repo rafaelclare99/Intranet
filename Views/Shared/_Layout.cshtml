@@ -37,6 +37,12 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Chat" asp-action="Index">Chat</a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li>
+                                <a class="nav-link"  asp-controller="Agente" asp-action="Index">Agentes</a>
+                            </li>
+                        }
                     </ul>
                     <form asp-area="Identity" asp-page="/Account/Logout" method="post">
                         <button type="submit" class="btn btn-link nav-link">Sair</button>

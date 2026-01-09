@@ -1,0 +1,26 @@
+﻿@model ApplicationUser
+
+<h2>Novo Agente</h2>
+
+<form method="post">
+    <label>Nome</label>
+    <input asp-for="Nome" class="form-control" />
+
+    <label>Email</label>
+    <input asp-for="Email" class="form-control" />
+
+    <label>Senha</label>
+    <input type="password" name="senha" class="form-control" />
+
+    <label>Setor</label>
+    <input asp-for="Setor" class="form-control" />
+
+    <label>Ativo</label>
+    <select asp-for="Ativo" class="form-control">
+        <option value="true">Sim</option>
+        <option value="false">Não</option>
+    </select>
+
+    <br />
+    <button type="submit" class="btn btn-success">Salvar</button>
+</form>

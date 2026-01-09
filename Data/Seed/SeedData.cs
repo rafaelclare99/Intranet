@@ -1,47 +1,40 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using IntraNet.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntraNet.Data
+namespace IntraNet.Data.Seed
 {
     public static class SeedData
     {
         public static async Task CreateAdminAsync(IServiceProvider serviceProvider)
         {
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
             // ROLES
-            string[] roles = { "Admin", "Agente" };
+            if (!await roleManager.RoleExistsAsync("Admin"))
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
 
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
+            if (!await roleManager.RoleExistsAsync("Usuario"))
+                await roleManager.CreateAsync(new IdentityRole("Usuario"));
 
-            // ADMIN USER
-            var adminEmail = "admin@intranet.local";
+            // USUÁRIO ADMIN
+            var adminEmail = "admin@admin.com";
             var adminPassword = "Admin@123";
 
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            var admin = await userManager.FindByEmailAsync(adminEmail);
 
-            if (adminUser == null)
+            if (admin == null)
             {
-                adminUser = new IdentityUser
+                admin = new ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
                     EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
+                await userManager.CreateAsync(admin, adminPassword);
+                await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
     }

@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntraNet.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext
+        : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options)
@@ -12,9 +13,8 @@ namespace IntraNet.Data
         {
         }
 
-        // Tabelas da Intranet
-        public DbSet<ChatMensagem> ChatMensagens { get; set; }
         public DbSet<Avisos> Avisos { get; set; }
         public DbSet<Processo> Processos { get; set; }
+        public DbSet<ChatMensagem> ChatMensagens { get; set; }
     }
 }

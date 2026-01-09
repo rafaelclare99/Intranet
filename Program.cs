@@ -1,13 +1,15 @@
 using IntraNet.Data;
+using IntraNet.Data.Seed;
 using IntraNet.Hubs;
+using IntraNet.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using IntraNet.Areas.Identity.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
+// MVC + Razor Pages 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // SIGNALR
 builder.Services.AddSignalR();
@@ -18,32 +20,26 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // IDENTITY
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-})
-.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
-// 🔐 CONFIGURAÇÃO DO COOKIE (AQUI É O LUGAR CERTO)
+// COOKIE
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-    options.SlidingExpiration = false;
-    options.Cookie.IsEssential = true;
-    options.Cookie.HttpOnly = true;
-
-    // 🔴 COOKIE DE SESSÃO (desloga ao fechar navegador)
     options.Cookie.MaxAge = null;
-
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
 });
 
 var app = builder.Build();
 
-// ================= PIPELINE =================
-
+// PIPELINE
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -52,25 +48,21 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ================= ROTAS =================
-
+// ROTAS
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 
-// SIGNALR HUB
+// SIGNALR
 app.MapHub<ChatHub>("/chatHub");
 
-// ================= SEED ADMIN =================
-
+// SEED ADMIN
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await SeedData.CreateAdminAsync(services);
 }
-
-// ================= START APP =================
 
 app.Run();

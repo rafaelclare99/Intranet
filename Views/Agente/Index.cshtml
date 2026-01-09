@@ -1,0 +1,41 @@
+﻿@model IEnumerable<ApplicationUser>
+
+<h2>Painel de Agentes</h2>
+
+<a asp-action="Create" class="btn btn-primary">Novo Agente</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Setor</th>
+            <th>Ativo</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.Nome</td>
+                <td>@a.Email</td>
+                <td>@a.Setor</td>
+                <td>@(a.Ativo ? "Sim" : "Não")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@a.Id">Editar</a> |
+                    <button onclick="confirmar('@a.Id')">Excluir</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function confirmar(id) {
+        if (confirm("Tem certeza que deseja excluir este agente?")) {
+            fetch('/Agente/Delete?id=' + id, { method: 'POST' })
+                .then(() => location.reload());
+        }
+    }
+</script>
