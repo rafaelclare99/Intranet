@@ -5,121 +5,63 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[Authorize]
-public class AvisosController : Controller
+namespace IntraNet.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public AvisosController(
-        ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager)
+    [Authorize]
+    public class AvisosController : Controller
     {
-        _context = context;
-        _userManager = userManager;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-    // 📌 LISTAGEM
-    public async Task<IActionResult> Index()
-    {
-        var user = await _userManager.GetUserAsync(User);
-
-        // Segurança extra
-        if (user == null)
-            return Challenge();
-
-        var roles = await _userManager.GetRolesAsync(user);
-        var role = roles.FirstOrDefault();
-
-        IQueryable<Avisos> query = _context.Avisos
-            .Include(a => a.Autor);
-
-        // 🔴 Admin vê tudo
-        if (!User.IsInRole("Admin"))
+        public AvisosController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
-            query = query.Where(a => a.Setor == null || a.Setor == role);
+            _context = context;
+            _userManager = userManager;
         }
 
-        var avisos = await query
-            .OrderByDescending(a => a.DataCriacao)
-            .ToListAsync();
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
 
-        return View(avisos);
-    }
+            IQueryable<Avisos> query = _context.Avisos;
 
-    // ➕ CRIAR (GET)
-    [Authorize(Roles = "Admin")]
-    public IActionResult Criar()
-    {
-        return View("CriarAvisos");
-    }
+            // 🔴 Admin vê tudo
+            if (!User.IsInRole("Admin"))
+            {
+                query = query.Where(a =>
+                    a.Setor == null || a.Setor == user.Setor);
+            }
 
-    // ➕ CRIAR (POST)
-    [HttpPost]
-    [Authorize(Roles = "Admin")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Criar(Avisos aviso)
-    {
-        if (!ModelState.IsValid)
-            return View("CriarAvisos", aviso);
+            var avisos = await query
+                .OrderByDescending(a => a.DataCriacao)
+                .ToListAsync();
 
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-            return Challenge();
+            return View(avisos);
+        }
 
-        aviso.AutorId = user.Id;
-        aviso.DataCriacao = DateTime.Now;
+        [Authorize(Roles = "Admin")]
+        public IActionResult Criar()
+        {
+            return View();
+        }
 
-        _context.Avisos.Add(aviso);
-        await _context.SaveChangesAsync();
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Criar(Avisos aviso)
+        {
+            if (!ModelState.IsValid)
+                return View(aviso);
 
-        return RedirectToAction(nameof(Index));
-    }
+            aviso.AutorId = _userManager.GetUserId(User)!;
+            aviso.DataCriacao = DateTime.Now;
 
-    // ✏️ EDITAR (GET)
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Editar(int id)
-    {
-        var aviso = await _context.Avisos.FindAsync(id);
-        if (aviso == null)
-            return NotFound();
+            _context.Avisos.Add(aviso);
+            await _context.SaveChangesAsync();
 
-        return View(aviso);
-    }
-
-    // ✏️ EDITAR (POST)
-    [HttpPost]
-    [Authorize(Roles = "Admin")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Editar(Avisos aviso)
-    {
-        if (!ModelState.IsValid)
-            return View(aviso);
-
-        var avisoDb = await _context.Avisos.FindAsync(aviso.AvisosId);
-        if (avisoDb == null)
-            return NotFound();
-
-        avisoDb.Titulo = aviso.Titulo;
-        avisoDb.Mensagem = aviso.Mensagem;
-        avisoDb.Setor = aviso.Setor;
-
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(Index));
-    }
-
-    // ❌ EXCLUIR
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Excluir(int id)
-    {
-        var aviso = await _context.Avisos.FindAsync(id);
-        if (aviso == null)
-            return NotFound();
-
-        _context.Avisos.Remove(aviso);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

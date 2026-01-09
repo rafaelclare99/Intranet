@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IntraNet.Models
 {
@@ -16,13 +15,10 @@ namespace IntraNet.Models
 
         public DateTime DataCriacao { get; set; } = DateTime.Now;
 
+        // null = geral
         public string? Setor { get; set; }
 
-        // 🔑 FK para Identity
-        [Required]
-        public string AutorId { get; set; }
-
-        // 🔗 Navegação
-        public ApplicationUser Autor { get; set; }
+        // 
+        public string? AutorId { get; set; }
     }
 }

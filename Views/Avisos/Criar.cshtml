@@ -1,0 +1,42 @@
+﻿@model IntraNet.Models.Avisos
+
+@{
+    ViewData["Title"] = "Criar Aviso";
+}
+
+<h2>Criar Aviso</h2>
+
+<form asp-action="Criar" method="post">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Titulo" class="form-label"></label>
+        <input asp-for="Titulo" class="form-control" />
+        <span asp-validation-for="Titulo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Mensagem" class="form-label"></label>
+        <textarea asp-for="Mensagem" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Mensagem" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Setor" class="form-label"></label>
+        <input asp-for="Setor" class="form-control" placeholder="Ex: Financeiro, Suporte" />
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        💾 Salvar Aviso
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary ms-2">
+        Voltar
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

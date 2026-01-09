@@ -2,7 +2,7 @@ using System.Diagnostics;
 using IntraNet.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+
 
 namespace IntraNet.Controllers
 {

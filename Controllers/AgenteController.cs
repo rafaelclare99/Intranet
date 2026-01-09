@@ -44,6 +44,7 @@ public class AgenteController : Controller
 
         var result = await _userManager.CreateAsync(user, senha);
 
+
         if (!result.Succeeded)
         {
             foreach (var e in result.Errors)
@@ -51,6 +52,8 @@ public class AgenteController : Controller
 
             return View(model);
         }
+        await _userManager.CreateAsync(user, senha);
+        await _userManager.AddToRoleAsync(user, "Agente");
 
         return RedirectToAction(nameof(Index));
     }

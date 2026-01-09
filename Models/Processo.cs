@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace IntraNet.Models
 {
@@ -9,12 +10,14 @@ namespace IntraNet.Models
         [Required]
         public string Titulo { get; set; } = "";
 
+        [Required]
         public string Descricao { get; set; } = "";
 
         public string Setor { get; set; } = "";
 
+        public DateTime DataCriacao { get; set; }
         public string ArquivoPath { get; set; } = "";
 
-        public DateTime DataCriacao { get; set; } = DateTime.Now;
+        public string AutorId { get; set; } = "";
     }
 }
