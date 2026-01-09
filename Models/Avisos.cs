@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace IntraNet.Models
 {
     public class Avisos
     {
-        [Key] // 👈 garante que o EF entenda como PK
+        [Key]
         public int AvisosId { get; set; }
 
         [Required]
@@ -15,9 +16,13 @@ namespace IntraNet.Models
 
         public DateTime DataCriacao { get; set; } = DateTime.Now;
 
-        // null = geral
         public string? Setor { get; set; }
 
-        public string AutorId { get; set; } = string.Empty;
+        // 🔑 FK para Identity
+        [Required]
+        public string AutorId { get; set; }
+
+        // 🔗 Navegação
+        public ApplicationUser Autor { get; set; }
     }
 }

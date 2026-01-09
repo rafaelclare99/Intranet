@@ -9,9 +9,11 @@ using Microsoft.EntityFrameworkCore;
 public class AvisosController : Controller
 {
     private readonly ApplicationDbContext _context;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public AvisosController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    public AvisosController(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _userManager = userManager;
@@ -21,9 +23,16 @@ public class AvisosController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        var role = (await _userManager.GetRolesAsync(user!)).FirstOrDefault();
 
-        IQueryable<Avisos> query = _context.Avisos;
+        // Segurança extra
+        if (user == null)
+            return Challenge();
+
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault();
+
+        IQueryable<Avisos> query = _context.Avisos
+            .Include(a => a.Autor);
 
         // 🔴 Admin vê tudo
         if (!User.IsInRole("Admin"))
@@ -48,12 +57,17 @@ public class AvisosController : Controller
     // ➕ CRIAR (POST)
     [HttpPost]
     [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Criar(Avisos aviso)
     {
         if (!ModelState.IsValid)
             return View("CriarAvisos", aviso);
 
-        aviso.AutorId = _userManager.GetUserId(User)!;
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return Challenge();
+
+        aviso.AutorId = user.Id;
         aviso.DataCriacao = DateTime.Now;
 
         _context.Avisos.Add(aviso);
@@ -76,6 +90,7 @@ public class AvisosController : Controller
     // ✏️ EDITAR (POST)
     [HttpPost]
     [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Editar(Avisos aviso)
     {
         if (!ModelState.IsValid)
