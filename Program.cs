@@ -2,24 +2,34 @@ using IntraNet.Data;
 using IntraNet.Data.Seed;
 using IntraNet.Hubs;
 using IntraNet.Models;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC + Razor Pages 
+// =====================
+// SERVICES
+// =====================
+
+// MVC + Razor Pages
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// SIGNALR
+// SignalR
 builder.Services.AddSignalR();
 
-// BANCO DE DADOS
+// Data Protection (IMPORTANTE para antiforgery / login)
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\inetpub\dataprotection-keys"))
+    .SetApplicationName("IntraNet");
+
+// Banco de dados
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// IDENTITY
+// Identity
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
@@ -28,18 +38,25 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// COOKIE
+// Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-    options.Cookie.MaxAge = null;
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
 });
 
+// =====================
+// PIPELINE
+// =====================
+
 var app = builder.Build();
 
-// PIPELINE
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -48,17 +65,17 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ROTAS
+// Rotas
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 
-// SIGNALR
+// SignalR
 app.MapHub<ChatHub>("/chatHub");
 
-// SEED ADMIN
+// Seed Admin
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
