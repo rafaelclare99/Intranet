@@ -21,6 +21,7 @@ namespace IntraNet.Controllers
             _userManager = userManager;
         }
 
+        // ================= LISTAGEM =================
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -28,6 +29,7 @@ namespace IntraNet.Controllers
 
             IQueryable<Processo> query = _context.Processos;
 
+            // 🔒 Agente só vê do próprio setor
             if (!User.IsInRole("Admin"))
             {
                 query = query.Where(p => p.Setor == user.Setor);
@@ -40,6 +42,7 @@ namespace IntraNet.Controllers
             return View(processos);
         }
 
+        // ================= CRIAR =================
         [Authorize(Roles = "Admin")]
         public IActionResult Criar()
         {
@@ -63,5 +66,51 @@ namespace IntraNet.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // ================= EDITAR =================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Editar(int id)
+        {
+            var processo = await _context.Processos.FindAsync(id);
+            if (processo == null)
+                return NotFound();
+
+            return View(processo);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Editar(Processo model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var processo = await _context.Processos.FindAsync(model.ProcessoId);
+            if (processo == null)
+                return NotFound();
+
+            processo.Titulo = model.Titulo;
+            processo.Descricao = model.Descricao;
+            processo.Setor = model.Setor;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ================= EXCLUIR =================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Excluir(int id)
+        {
+            var processo = await _context.Processos.FindAsync(id);
+            if (processo != null)
+            {
+                _context.Processos.Remove(processo);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

@@ -28,7 +28,7 @@ namespace IntraNet.Controllers
 
             IQueryable<Avisos> query = _context.Avisos;
 
-            // 🔴 Admin vê tudo
+            // Admin vê tudo
             if (!User.IsInRole("Admin"))
             {
                 query = query.Where(a =>
@@ -42,6 +42,9 @@ namespace IntraNet.Controllers
             return View(avisos);
         }
 
+        // =======================
+        // CRIAR
+        // =======================
         [Authorize(Roles = "Admin")]
         public IActionResult Criar()
         {
@@ -63,5 +66,49 @@ namespace IntraNet.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // =======================
+        // EDITAR
+        // =======================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Editar(int id)
+        {
+            var aviso = await _context.Avisos.FindAsync(id);
+            if (aviso == null)
+                return NotFound();
+
+            return View(aviso);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Editar(Avisos aviso)
+        {
+            if (!ModelState.IsValid)
+                return View(aviso);
+
+            _context.Avisos.Update(aviso);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =======================
+        // EXCLUIR
+        // =======================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Excluir(int id)
+        {
+            var aviso = await _context.Avisos.FindAsync(id);
+            if (aviso != null)
+            {
+                _context.Avisos.Remove(aviso);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
     }
 }

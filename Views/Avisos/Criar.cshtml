@@ -24,8 +24,14 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="Setor" class="form-label"></label>
-        <input asp-for="Setor" class="form-control" placeholder="Ex: Financeiro, Suporte" />
+        <label class="form-label">Setor</label>
+        <select asp-for="Setor" class="form-select" required>
+            <option value="">Selecione</option>
+            <option value="NOC">NOC</option>
+            <option value="Suporte">Suporte</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="Comercial">Comercial</option>
+        </select>
     </div>
 
     <button type="submit" class="btn btn-success">

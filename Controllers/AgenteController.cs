@@ -27,7 +27,7 @@ public class AgenteController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ApplicationUser model, string senha)
+    public async Task<IActionResult> Create(ApplicationUser model, string senha, bool isAdmin)
     {
         if (!ModelState.IsValid)
             return View(model);
@@ -44,7 +44,6 @@ public class AgenteController : Controller
 
         var result = await _userManager.CreateAsync(user, senha);
 
-
         if (!result.Succeeded)
         {
             foreach (var e in result.Errors)
@@ -52,11 +51,17 @@ public class AgenteController : Controller
 
             return View(model);
         }
-        await _userManager.CreateAsync(user, senha);
-        await _userManager.AddToRoleAsync(user, "Agente");
+
+        // 🔑 ROLE
+        if (isAdmin)
+            await _userManager.AddToRoleAsync(user, "Admin");
+        else
+            await _userManager.AddToRoleAsync(user, "Agente");
 
         return RedirectToAction(nameof(Index));
     }
+
+
 
     // ====== EDITAR ======
     public async Task<IActionResult> Edit(string id)
